@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  password      String 
+  name          String    
+  walletBalance Decimal    @db.Decimal(12,2)
+  Order         Position[]
+  Trade         Trade[]  
+}
+
+model Position {
+  id               String          @id @default(uuid())
+  userId           String          
+  user             User             @relation(fields: [userId],references: [id])
+  type             Type
+  symbol           String
+  pnl              Decimal?         @db.Decimal(12,2)
+  quantity         Decimal          @db.Decimal(12,2)
+  leverage         Int
+  openingPrice     Decimal          @db.Decimal(12,2)
+  closingPrice     Decimal?         @db.Decimal(12,2)
+  takeProfit       Decimal?         @db.Decimal(12,2)
+  stopLoss         Decimal?         @db.Decimal(12,2)
+  createdAt        DateTime         @default(now())
+  closedAt         DateTime?
+  closeType        CloseType?
+  status           Status           @default(OPEN)
+  trade            Trade?
+  
+}
+
+enum Type {
+  LONG
+  SHORT
+}
+
+enum CloseType {
+  TAKE_PROFIT
+  STOP_LOSS
+  MANUAL
+  LIQUIDATION
+}
+
+enum Status {
+  OPEN
+  CLOSED
+}
+
+
+model Trade {
+  id             String         @id @default(uuid())
+  userId         String
+  user           User           @relation(fields: [userId],references: [id])
+  positionId     String         @unique
+  position       Position       @relation(fields: [positionId],references: [id])
+  balanceBefore  Decimal        @db.Decimal(12,2)
+  balanceAfter   Decimal        @db.Decimal(12,2)
+  createdAt      DateTime       @default(now())
+}
