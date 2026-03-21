@@ -18,7 +18,7 @@ model User {
   email         String     @unique
   password      String 
   name          String    
-  walletBalance Decimal    @db.Decimal(12,2)
+  walletBalance Decimal    @db.Decimal(12,2) @default(0)
   Order         Position[]
   Trade         Trade[]  
 }
